@@ -48,9 +48,13 @@ jobs:
           load: true
           provenance: false
           sbom: false
-          tags: ghcr.io/cosmogao/aegis-terminal:main
+          tags: |
+            ghcr.io/cosmogao/aegis-terminal:main
+            ghcr.io/cosmogao/aegis-terminal:1.4.0
       - name: Push image
-        run: docker push ghcr.io/cosmogao/aegis-terminal:main
+        run: |
+          docker push ghcr.io/cosmogao/aegis-terminal:main
+          docker push ghcr.io/cosmogao/aegis-terminal:1.4.0
 
   guacd:
     name: Build guacd
@@ -78,4 +82,3 @@ jobs:
         run: |
           docker push ghcr.io/cosmogao/guacd:1.4.0
           docker push ghcr.io/cosmogao/guacd:main
-
