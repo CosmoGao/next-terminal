@@ -1,0 +1,32 @@
+FROM golang:1.20-alpine AS builder
+
+ENV GO111MODULE=on
+ENV GOPROXY=https://proxy.golang.org,direct
+
+WORKDIR /app
+COPY . .
+RUN cp -r /app/web/build /app/server/resource/
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build -ldflags '-s -w' -o next-terminal main.go
+
+FROM alpine:3.20
+
+ENV TZ=Asia/Shanghai
+ENV DB=sqlite
+ENV SQLITE_FILE=./data/sqlite/next-terminal.db
+ENV SERVER_PORT=8088
+ENV SERVER_ADDR=0.0.0.0:8088
+ENV SSHD_PORT=8089
+ENV SSHD_ADDR=0.0.0.0:8089
+
+RUN apk add --no-cache tzdata \
+ && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+ && echo Asia/Shanghai > /etc/timezone
+
+WORKDIR /usr/local/next-terminal
+COPY --from=builder /app/next-terminal ./
+COPY --from=builder /app/LICENSE ./
+RUN touch config.yml
+
+EXPOSE 8088 8089
+ENTRYPOINT ["./next-terminal"]
