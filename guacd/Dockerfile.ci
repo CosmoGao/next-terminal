@@ -1,0 +1,90 @@
+# Build guacd from Apache guacamole-server 1.4.0.
+# Next Terminal tagged its own image 1.4.0. guacamole-server 1.5.5 and 1.6.0
+# fail RDP security negotiation against the Windows host at 172.20.1.10.
+FROM debian:buster-slim AS builder
+
+ARG GUACAMOLE_SERVER_VERSION=1.4.0
+ARG PREFIX_DIR=/usr/local/guacamole
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN printf 'deb http://archive.debian.org/debian buster main contrib non-free\n' > /etc/apt/sources.list \
+ && printf 'deb http://archive.debian.org/debian-security buster/updates main contrib non-free\n' >> /etc/apt/sources.list \
+ && printf 'deb http://archive.debian.org/debian buster-backports main contrib non-free\n' >> /etc/apt/sources.list \
+ && printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99archive
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      autoconf \
+      automake \
+      gcc \
+      libcairo2-dev \
+      libgcrypt-dev \
+      libjpeg62-turbo-dev \
+      libossp-uuid-dev \
+      libpango1.0-dev \
+      libpulse-dev \
+      libssh2-1-dev \
+      libssl-dev \
+      libtelnet-dev \
+      libtool \
+      libvncserver-dev \
+      libwebsockets-dev \
+      libwebp-dev \
+      make \
+      pkg-config \
+ && apt-get install -y --no-install-recommends -t buster-backports freerdp2-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL "https://archive.apache.org/dist/guacamole/${GUACAMOLE_SERVER_VERSION}/source/guacamole-server-${GUACAMOLE_SERVER_VERSION}.tar.gz" \
+      | tar -xz -C /tmp
+
+WORKDIR /tmp/guacamole-server-${GUACAMOLE_SERVER_VERSION}
+
+RUN ./configure --prefix="${PREFIX_DIR}" --disable-guaclog --with-freerdp-plugin-dir="${PREFIX_DIR}/lib/freerdp2" \
+ && make -j"$(nproc)" \
+ && make install \
+ && ldconfig
+
+# Package names for the runtime libraries, excluding the ones we just built.
+RUN set -eu; \
+    ldd "${PREFIX_DIR}/sbin/guacd" "${PREFIX_DIR}/lib/libguac-client-"*.so "${PREFIX_DIR}/lib/freerdp2/"*.so \
+      | awk '/=>/ && !/libguac/ {print $(NF-1)}' \
+      | sort -u \
+      | while read -r library; do \
+          dpkg-query -S "$library" 2>/dev/null || true; \
+        done \
+      | cut -f1 -d: | sort -u > "${PREFIX_DIR}/DEPENDENCIES"
+
+FROM debian:buster-slim
+
+ARG PREFIX_DIR=/usr/local/guacamole
+ARG DEBIAN_FRONTEND=noninteractive
+ENV LD_LIBRARY_PATH=/usr/local/guacamole/lib
+ENV GUACD_LOG_LEVEL=info
+
+RUN printf 'deb http://archive.debian.org/debian buster main contrib non-free\n' > /etc/apt/sources.list \
+ && printf 'deb http://archive.debian.org/debian-security buster/updates main contrib non-free\n' >> /etc/apt/sources.list \
+ && printf 'deb http://archive.debian.org/debian buster-backports main contrib non-free\n' >> /etc/apt/sources.list \
+ && printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99archive
+
+COPY --from=builder ${PREFIX_DIR} ${PREFIX_DIR}
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates \
+      fontconfig \
+      xfonts-utils \
+ && apt-get install -y --no-install-recommends $(cat "${PREFIX_DIR}/DEPENDENCIES") \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /usr/lib/x86_64-linux-gnu/freerdp2 \
+ && ln -sf ${PREFIX_DIR}/lib/freerdp2/libguac*.so /usr/lib/x86_64-linux-gnu/freerdp2/
+
+COPY guacd/fonts/Menlo-Regular.ttf guacd/fonts/SourceHanSansCN-Regular.otf /usr/share/fonts/
+RUN mkfontscale && mkfontdir && fc-cache
+
+EXPOSE 4822
+
+# Root, so a QNAP bind mount can be written without matching uid 1000.
+CMD /usr/local/guacamole/sbin/guacd -b 0.0.0.0 -L "$GUACD_LOG_LEVEL" -f

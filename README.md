@@ -2,9 +2,12 @@
 
 基于 [dushixiang/next-terminal](https://github.com/dushixiang/next-terminal) v1.3.9（提交 `27ca72d`）的独立分支。v1.3.9 是上游最后一个 AGPL-3.0 版本，v2 及之后的后端不再开源，本仓库不包含那些代码。
 
-镜像：`ghcr.io/cosmogao/next-terminal:main`
+镜像：
 
-推送到 `main` 后，GitHub Actions 会构建前端并发布 linux/amd64 镜像。
+- `ghcr.io/cosmogao/next-terminal:main`
+- `ghcr.io/cosmogao/guacd:1.4.0`
+
+推送到 `main` 后，GitHub Actions 会构建前端和 guacd，并发布 linux/amd64 镜像。guacd 从 Apache guacamole-server 1.4.0 源码编译，再装上仓库里的字体。不用 `dushixiang/guacd:latest`，那份和 1.6.0 一样，连 Windows 时 RDP 安全协商会失败。
 
 ## 现在能做什么
 
@@ -15,7 +18,7 @@
 - 批量命令、计划任务和登录策略
 - 内置 SSH 入口（密码登录）
 
-还没做的，也是这个分支接下来要补的：SSH 公钥登录、按用户授权资产、以及一个对外的 SSH 入口。guacd 和会话层先不动。
+还没做的，也是这个分支接下来要补的：SSH 公钥登录、按用户授权资产、以及一个对外的 SSH 入口。会话协议先不动，guacd 固定在 1.4.0。
 
 ## 测试部署
 
@@ -24,7 +27,6 @@
 - 网页：`http://<主机>:18088`，默认账号 `admin` / `admin`，第一次登录后改掉。
 - SSH 入口：`<主机>:18089`，同样是这个账号的密码。
 - 数据在 `/share/Container/next-terminal-dev/data`，和正在使用的 Next Terminal 分开。
-- `guacd` 请换成你现在能连上 Windows 的那份镜像。`dushixiang/guacd:latest` 对应 1.6.0，连家里的 Windows 会在 RDP 安全协商阶段失败。
 
 网页里的 SSH、RDP、VNC 走 guacd。两个容器必须把同一份数据挂到同一个绝对路径 `/usr/local/next-terminal/data`，录屏和网盘文件才写得进去。
 

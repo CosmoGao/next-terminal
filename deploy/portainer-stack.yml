@@ -21,8 +21,7 @@ services:
       - /share/Container/next-terminal-dev/data:/usr/local/next-terminal/data
 
   guacd:
-    # 换成当前能连上 Windows 的那份 guacd。latest 是 1.6.0，RDP 会协商失败。
-    image: dushixiang/guacd:latest
+    image: ghcr.io/cosmogao/guacd:1.4.0
     container_name: next-terminal-dev-guacd
     restart: unless-stopped
     volumes:
