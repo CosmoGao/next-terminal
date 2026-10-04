@@ -36,7 +36,7 @@ AI Native 是目标方向，当前版本尚未内置 AI API。
 
 ## 本地编译
 
-前端用 Node 22。`react-scripts` 5 在 Node 17+ 需要旧的 OpenSSL 摘要：
+前端用 Node 24（当前 Active LTS）。`react-scripts` 5 在 Node 17+ 需要旧的 OpenSSL 摘要：
 
 ```shell
 cd web

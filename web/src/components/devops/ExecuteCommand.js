@@ -4,11 +4,11 @@ import commandApi from "../../api/command";
 import Message from "../access/Message";
 import {Input, Layout, Spin} from "antd";
 import {ProCard} from "@ant-design/pro-components";
-import "xterm/css/xterm.css"
+import "@xterm/xterm/css/xterm.css"
 import "./ExecuteCommand.css"
 import sessionApi from "../../api/session";
-import {Terminal} from "xterm";
-import {FitAddon} from "xterm-addon-fit";
+import {Terminal} from "@xterm/xterm";
+import {FitAddon} from "@xterm/addon-fit";
 import {getToken} from "../../utils/utils";
 import qs from "qs";
 import {wsServer} from "../../common/env";

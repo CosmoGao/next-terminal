@@ -1,5 +1,7 @@
 FROM golang:1.20-alpine AS builder
 
+# web/build is produced before this image, with Node 24 (see .github/workflows/build-image.yml).
+
 ENV GO111MODULE=on
 ENV GOPROXY=https://proxy.golang.org,direct
 

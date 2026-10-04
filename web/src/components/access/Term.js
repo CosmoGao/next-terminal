@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useSearchParams} from "react-router-dom";
-import {Terminal} from "xterm";
-import {FitAddon} from "xterm-addon-fit";
+import {Terminal} from "@xterm/xterm";
+import {FitAddon} from "@xterm/addon-fit";
 import {getToken} from "../../utils/utils";
 import request from "../../common/request";
 import {Affix, Button, Drawer, Dropdown, Menu, message, Select, Space, Typography} from "antd";
@@ -11,7 +11,7 @@ import {wsServer} from "../../common/env";
 import Draggable from "react-draggable";
 import {CodeOutlined, FolderOutlined, LineChartOutlined} from "@ant-design/icons";
 import FileSystem from "../devops/FileSystem";
-import "xterm/css/xterm.css"
+import "@xterm/xterm/css/xterm.css"
 import Stats from "./Stats";
 import {debounce} from "../../utils/fun";
 import commandApi from "../../api/command";

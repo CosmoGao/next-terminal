@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Terminal} from "xterm";
-import {FitAddon} from "xterm-addon-fit";
+import {Terminal} from "@xterm/xterm";
+import {FitAddon} from "@xterm/addon-fit";
 import {getToken} from "../../utils/utils";
 import {debounce} from "../../utils/fun";
 import qs from "qs";
 import {wsServer} from "../../common/env";
 import Message from "../access/Message";
 import {useSearchParams} from "react-router-dom";
-import "xterm/css/xterm.css";
+import "@xterm/xterm/css/xterm.css";
 
 const TermMonitor = () => {
 

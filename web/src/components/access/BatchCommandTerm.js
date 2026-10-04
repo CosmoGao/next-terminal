@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
-import "xterm/css/xterm.css"
-import {Terminal} from "xterm";
+import "@xterm/xterm/css/xterm.css"
+import {Terminal} from "@xterm/xterm";
 import qs from "qs";
 import {wsServer} from "../../common/env";
 import "./BatchCommandTerm.css"
 import {getToken, isEmpty} from "../../utils/utils";
-import {FitAddon} from 'xterm-addon-fit'
+import {FitAddon} from '@xterm/addon-fit'
 import request from "../../common/request";
 import {message} from "antd";
 import Message from './Message'
