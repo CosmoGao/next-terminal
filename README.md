@@ -1,38 +1,42 @@
-# Next Terminal
+# Aegis Terminal
 
-基于 [dushixiang/next-terminal](https://github.com/dushixiang/next-terminal) v1.3.9（提交 `27ca72d`）的独立分支。v1.3.9 是上游最后一个 AGPL-3.0 版本，v2 及之后的后端不再开源，本仓库不包含那些代码。
+开源、轻量、AI Native 的堡垒机，用于管理多台 Windows / Linux 服务器。
 
-镜像：
+本仓库是 [dushixiang/next-terminal](https://github.com/dushixiang/next-terminal) 最后开源版 **v1.3.9**（提交 `27ca72d`）的分叉。上游 v1.3.9 之后的后端不再开源，本仓库不包含那些代码。感谢原作者 [dushixiang](https://github.com/dushixiang)。
 
-- `ghcr.io/cosmogao/next-terminal:main`
-- `ghcr.io/cosmogao/guacd:1.4.0`
+AI Native 是目标方向，当前版本尚未内置 AI API。
 
-推送到 `main` 后，GitHub Actions 会构建前端和 guacd，并发布 linux/amd64 镜像。guacd 从 Apache guacamole-server 1.4.0 源码编译，再装上仓库里的字体。不用 `dushixiang/guacd:latest`，那份和 1.6.0 一样，连 Windows 时 RDP 安全协商会失败。
+## 镜像
 
-## 现在能做什么
+- 应用：`ghcr.io/cosmogao/aegis-terminal:main`
+- guacd：`ghcr.io/cosmogao/guacd:1.4.0`（不用 `:latest`）
 
-这是交互审计系统，支持 RDP、SSH、VNC、Telnet、Kubernetes。v1.3.9 里已经有：
+推送到 `main` 后，GitHub Actions 会构建并发布 linux/amd64 镜像。guacd 从 Apache guacamole-server 1.4.0 源码编译并装上仓库字体；不用上游 `dushixiang/guacd:latest`（与 1.6.0 同类，连 Windows 时 RDP 安全协商会失败）。
 
-- 资产、授权凭证和用户分组
+## 已有能力（继承自 Next Terminal v1.3.9）
+
+支持 RDP、SSH、VNC、Telnet、Kubernetes：
+
+- 资产、授权凭证与用户分组
 - 在线会话监控、强制断开，以及离线录屏
 - 批量命令、计划任务和登录策略
 - 内置 SSH 入口（密码登录）
 
-还没做的，也是这个分支接下来要补的：SSH 公钥登录、按用户授权资产、以及一个对外的 SSH 入口。会话协议先不动，guacd 固定在 1.4.0。
+后续计划（尚未实现）：SSH 公钥登录、按用户授权资产、对外 SSH 入口等。会话协议先不动，guacd 固定 1.4.0。
 
 ## 测试部署
 
-在威联通的 Portainer 里新建一个 stack，内容见 [deploy/portainer-stack.yml](./deploy/portainer-stack.yml)。
+在威联通 Portainer 中新建 stack，内容见 [deploy/portainer-stack.yml](./deploy/portainer-stack.yml)。
 
-- 网页：`http://<主机>:18088`，默认账号 `admin` / `admin`，第一次登录后改掉。
-- SSH 入口：`<主机>:18089`，同样是这个账号的密码。
-- 数据在 `/share/Container/next-terminal-dev/data`，和正在使用的 Next Terminal 分开。
+- 网页：`http://<主机>:18088`，默认账号 `admin` / `admin`，首次登录后请改密
+- SSH 入口：`<主机>:18089`，同一账号密码
+- 数据目录：`/share/Container/next-terminal-dev/data`（与正式使用的 Next Terminal 分开）
 
-网页里的 SSH、RDP、VNC 走 guacd。两个容器必须把同一份数据挂到同一个绝对路径 `/usr/local/next-terminal/data`，录屏和网盘文件才写得进去。
+网页里的 SSH / RDP / VNC 走 guacd。两个容器须把同一份数据挂到同一绝对路径 `/usr/local/next-terminal/data`，录屏和网盘才能写入。
 
 ## 本地编译
 
-前端用 Node 22。`react-scripts` 5 在 Node 17 及以后需要旧的 OpenSSL 摘要。
+前端用 Node 22。`react-scripts` 5 在 Node 17+ 需要旧的 OpenSSL 摘要：
 
 ```shell
 cd web
@@ -43,8 +47,8 @@ cp -r web/build server/resource/
 CGO_ENABLED=0 go build -ldflags '-s -w' -o next-terminal main.go
 ```
 
-Go 版本按 `Dockerfile.ci`，用 1.20。仓库里没有 `yarn.lock`，依赖会按 `package.json` 的范围重新解析。
+Go 版本见 `Dockerfile.ci`（1.20）。仓库无 `yarn.lock`，依赖按 `package.json` 范围解析。
 
 ## 协议
 
-[AGPL-3.0](./LICENSE)。不能改成别的协议。使用、修改或分发前需要遵守该协议，本项目不提供担保。
+[AGPL-3.0](./LICENSE)。不能改成别的协议。使用、修改或分发前须遵守该协议；本项目不提供担保。

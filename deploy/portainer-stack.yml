@@ -1,6 +1,6 @@
 services:
   next-terminal:
-    image: ghcr.io/cosmogao/next-terminal:main
+    image: ghcr.io/cosmogao/aegis-terminal:main
     container_name: next-terminal-dev
     restart: unless-stopped
     ports:
