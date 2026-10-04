@@ -42,8 +42,15 @@ jobs:
           context: .
           file: Dockerfile.ci
           platforms: linux/amd64
-          push: true
+          # Load a Docker schema 2 image, then push it. Buildx's default
+          # OCI index (provenance) is rejected by the QNAP Docker daemon
+          # as "manifest unknown".
+          load: true
+          provenance: false
+          sbom: false
           tags: ghcr.io/cosmogao/next-terminal:main
+      - name: Push image
+        run: docker push ghcr.io/cosmogao/next-terminal:main
 
   guacd:
     name: Build guacd
@@ -61,8 +68,14 @@ jobs:
           context: .
           file: guacd/Dockerfile.ci
           platforms: linux/amd64
-          push: true
+          load: true
+          provenance: false
+          sbom: false
           tags: |
             ghcr.io/cosmogao/guacd:1.4.0
             ghcr.io/cosmogao/guacd:main
+      - name: Push image
+        run: |
+          docker push ghcr.io/cosmogao/guacd:1.4.0
+          docker push ghcr.io/cosmogao/guacd:main
 
