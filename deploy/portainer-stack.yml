@@ -1,0 +1,29 @@
+services:
+  next-terminal:
+    image: ghcr.io/cosmogao/next-terminal:main
+    container_name: next-terminal-dev
+    restart: unless-stopped
+    ports:
+      - "18088:8088"
+      - "18089:8089"
+    environment:
+      DB: sqlite
+      SQLITE_FILE: /usr/local/next-terminal/data/sqlite/next-terminal.db
+      SERVER_ADDR: 0.0.0.0:8088
+      GUACD_HOSTNAME: guacd
+      GUACD_PORT: "4822"
+      GUACD_RECORDING: /usr/local/next-terminal/data/recording
+      GUACD_DRIVE: /usr/local/next-terminal/data/drive
+      SSHD_ENABLE: "true"
+      SSHD_ADDR: 0.0.0.0:8089
+      SSHD_KEY: /usr/local/next-terminal/data/ssh/id_rsa
+    volumes:
+      - /share/Container/next-terminal-dev/data:/usr/local/next-terminal/data
+
+  guacd:
+    # 换成当前能连上 Windows 的那份 guacd。latest 是 1.6.0，RDP 会协商失败。
+    image: dushixiang/guacd:latest
+    container_name: next-terminal-dev-guacd
+    restart: unless-stopped
+    volumes:
+      - /share/Container/next-terminal-dev/data:/usr/local/next-terminal/data

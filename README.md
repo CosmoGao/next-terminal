@@ -1,73 +1,48 @@
 # Next Terminal
 
-[![Docker guacd build](https://github.com/dushixiang/next-terminal/actions/workflows/docker-guacd.yml/badge.svg)](https://github.com/dushixiang/next-terminal/actions/workflows/docker-guacd.yml)
-[![Docker next-terminal build](https://github.com/dushixiang/next-terminal/actions/workflows/docker-next-terminal.yml/badge.svg)](https://github.com/dushixiang/next-terminal/actions/workflows/docker-next-terminal.yml)
+基于 [dushixiang/next-terminal](https://github.com/dushixiang/next-terminal) v1.3.9（提交 `27ca72d`）的独立分支。v1.3.9 是上游最后一个 AGPL-3.0 版本，v2 及之后的后端不再开源，本仓库不包含那些代码。
 
-## 快速了解
+镜像：`ghcr.io/cosmogao/next-terminal:main`
 
-Next Terminal是一个简单好用安全的开源交互审计系统，支持RDP、SSH、VNC、Telnet、Kubernetes协议。
+推送到 `main` 后，GitHub Actions 会构建前端并发布 linux/amd64 镜像。
 
-目前支持的功能有：
+## 现在能做什么
 
-- 授权凭证管理
-- 资产管理（支持RDP、SSH、VNC、TELNET协议）
-- 指令管理
-- 批量执行命令
-- 在线会话管理（监控、强制断开）
-- 离线会话管理（查看录屏）
-- 双因素认证
-- 资产标签
-- 资产授权
-- 多用户&用户分组
-- 计划任务
-- ssh server
-- 登录策略
-- 系统监控
+这是交互审计系统，支持 RDP、SSH、VNC、Telnet、Kubernetes。v1.3.9 里已经有：
 
-## 在线体验
+- 资产、授权凭证和用户分组
+- 在线会话监控、强制断开，以及离线录屏
+- 批量命令、计划任务和登录策略
+- 内置 SSH 入口（密码登录）
 
-**web**
+还没做的，也是这个分支接下来要补的：SSH 公钥登录、按用户授权资产、以及一个对外的 SSH 入口。guacd 和会话层先不动。
 
-https://next.typesafe.cn/ 账号：test  密码：test
+## 测试部署
 
-**ssh server**
+在威联通的 Portainer 里新建一个 stack，内容见 [deploy/portainer-stack.yml](./deploy/portainer-stack.yml)。
 
-主机：next.typesafe.cn
-端口：2022
-账号：test  密码：test
+- 网页：`http://<主机>:18088`，默认账号 `admin` / `admin`，第一次登录后改掉。
+- SSH 入口：`<主机>:18089`，同样是这个账号的密码。
+- 数据在 `/share/Container/next-terminal-dev/data`，和正在使用的 Next Terminal 分开。
+- `guacd` 请换成你现在能连上 Windows 的那份镜像。`dushixiang/guacd:latest` 对应 1.6.0，连家里的 Windows 会在 RDP 安全协商阶段失败。
 
-## 协议与条款
+网页里的 SSH、RDP、VNC 走 guacd。两个容器必须把同一份数据挂到同一个绝对路径 `/usr/local/next-terminal/data`，录屏和网盘文件才写得进去。
 
-如您需要在企业网络中使用 next-terminal，建议先征求 IT 管理员的同意。下载、使用或分发 next-terminal 前，您必须同意 [协议](./LICENSE) 条款与限制。本项目不提供任何担保，亦不承担任何责任。
+## 本地编译
 
-## 快速安装
+前端用 Node 22。`react-scripts` 5 在 Node 17 及以后需要旧的 OpenSSL 摘要。
 
-- [安装文档](https://next-terminal.typesafe.cn)
+```shell
+cd web
+yarn install
+NODE_OPTIONS=--openssl-legacy-provider yarn build
+cd ..
+cp -r web/build server/resource/
+CGO_ENABLED=0 go build -ldflags '-s -w' -o next-terminal main.go
+```
 
-默认账号密码为 admin/admin 。
+Go 版本按 `Dockerfile.ci`，用 1.20。仓库里没有 `yarn.lock`，依赖会按 `package.json` 的范围重新解析。
 
-## 手动编译
+## 协议
 
-1. 找一台Linux 机器或者Mac
-2. 安装 go 1.18 或以上版本
-3. 安装 nodejs 16，安装 npm 或 yarn
-4. 进入 web 目录 执行 yarn 或 npm install
-5. 返回上级目录，也就是项目根目录，执行 sh build.sh
-
-## 问题反馈
-
-- Issues
-- 微信群 加我微信拉你进群 (请备注 next-terminal)
-
-<img src="wx.png" width="300"  height="auto"/>
-
-- QQ群 938145268
-- Telegram https://t.me/next_terminal
-
-## 安全问题
-
-如果您在使用过程中发现了安全问题，请发送邮件至 helloworld1024@foxmail.com 联系我，谢谢。
-
-## License 
-
-Next Terminal 使用 [AGPL-3.0](./LICENSE) 开源协议，请自觉遵守。
+[AGPL-3.0](./LICENSE)。不能改成别的协议。使用、修改或分发前需要遵守该协议，本项目不提供担保。
