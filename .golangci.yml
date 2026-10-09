@@ -1,23 +1,34 @@
-linters-settings:
-  goimports:
-    local-prefixes: next-terminal
+version: "2"
 
 linters:
-  disable-all: true
+  default: none
+  # deadcode, structcheck and varcheck were merged into unused; gosimple into staticcheck.
   enable:
-    - deadcode
     - errcheck
-    - gofmt
-    - goimports
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - structcheck
-    - typecheck
     - unused
-    - varcheck
+  # Same default exclusions golangci-lint v1 applied (exclude-use-default: true).
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
 
-run:
-  skip-files:
-    - test_ssh.go
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - next-terminal
+
+issues:
+  # Upgrading from golangci-lint v1.42 to v2 surfaced pre-existing findings in
+  # code this fork has not touched. Report only issues introduced after the upgrade.
+  # Needs full git history in CI (actions/checkout fetch-depth: 0).
+  new-from-rev: f93f49628e945e633ccfa9a9f11c0d9b5e46e0fb
